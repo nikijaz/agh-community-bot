@@ -2,6 +2,7 @@ from typing import Final
 
 from telethon import TelegramClient
 
+from src.features.anecdote.anecdote_feature import AnecdoteFeature
 from src.features.captcha.captcha_feature import CaptchaFeature
 from src.utils.config import CONFIG
 
@@ -14,6 +15,7 @@ bot: Final = TelegramClient(
 
 def setup_features() -> None:
     CaptchaFeature(bot).setup()
+    AnecdoteFeature(bot).setup()
 
 
 def main() -> None:

@@ -16,5 +16,7 @@ class Config:
     REDIS_HOST: str = os.environ["REDIS_HOST"]
     REDIS_PORT: int = int(os.environ["REDIS_PORT"])
 
+    INACTIVITY_TIMEOUT: int = int(os.environ.get("INACTIVITY_TIMEOUT", 3600))
+
 
 CONFIG: Final = Config()
