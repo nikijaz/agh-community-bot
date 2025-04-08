@@ -1,4 +1,5 @@
 import asyncio
+import time
 from typing import TypedDict, cast
 
 from redis import Redis
@@ -21,7 +22,7 @@ class CaptchaManager:
 
     async def __monitor_captcha_timeout(self) -> None:
         while True:
-            current_time = self.loop.time()
+            current_time = time.time()
             expired_keys: list[str] = self.redis.zrangebyscore(
                 "captcha_timeouts", 0, current_time
             )

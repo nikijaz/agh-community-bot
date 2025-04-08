@@ -1,4 +1,4 @@
-import asyncio
+import time
 
 from telethon import Button, TelegramClient
 from telethon.events import ChatAction
@@ -32,7 +32,7 @@ class UserJoinLeaveHandler:
         self.captcha_manager.add_captcha_timeout(
             event.chat_id,
             event.user_id,
-            (asyncio.get_event_loop().time() + 5),
+            (time.time() + 5),
             {"message_id": message.id},
         )
 

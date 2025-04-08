@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 from redis import Redis
 from telethon import TelegramClient
@@ -19,7 +20,7 @@ class ActivityManager:
 
     async def __monitor_last_message(self) -> None:
         while True:
-            current_time = self.loop.time()
+            current_time = time.time()
             inactive_chat_id_list: list[str] = self.redis.zrangebyscore(
                 "last_message_times",
                 0,
@@ -38,4 +39,4 @@ class ActivityManager:
         )
 
     def bump_activity(self, chat_id: int) -> None:
-        self.redis.zadd("last_message_times", {f"{chat_id}": self.loop.time()})
+        self.redis.zadd("last_message_times", {f"{chat_id}": time.time()})
