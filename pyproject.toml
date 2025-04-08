@@ -4,11 +4,21 @@ version = "0.1.0"
 license = { file = "LICENSE" }
 requires-python = ">=3.5"
 dependencies = [
-    "mypy>=0.910",
     "python-dotenv>=0.20.0",
-    "redis[hiredis]>=3.5.3",
+    "redis>=3.5.3",
+    "telethon>=1.39.0",
+]
+
+[project.optional-dependencies]
+speed = [
+    "cryptg>=0.3.1",
+    "hiredis>=1.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=0.910",
     "ruff>=0.0.17",
-    "telethon[cryptg]>=1.39.0",
     "types-redis>=4.4.0.0",
 ]
 
