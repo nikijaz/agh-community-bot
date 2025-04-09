@@ -13,6 +13,8 @@ class Config:
     TELEGRAM_API_HASH: str = os.environ["TELEGRAM_API_HASH"]
     TELEGRAM_BOT_TOKEN: str = os.environ["TELEGRAM_BOT_TOKEN"]
 
+    DATABASE_URL: str = os.environ["DATABASE_URL"]
+
     REDIS_HOST: str = os.environ["REDIS_HOST"]
     REDIS_PORT: int = int(os.environ["REDIS_PORT"])
 

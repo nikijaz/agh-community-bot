@@ -1,9 +1,11 @@
+import asyncio
 from typing import Final
 
 from telethon import TelegramClient
 
 from src.features.anecdote.anecdote_feature import AnecdoteFeature
 from src.features.captcha.captcha_feature import CaptchaFeature
+from src.store.db_store import setup_dp_store
 from src.utils.config import CONFIG
 
 bot: Final = TelegramClient(
@@ -18,10 +20,12 @@ def setup_features() -> None:
     AnecdoteFeature(bot).setup()
 
 
-def main() -> None:
+async def main() -> None:
     setup_features()
-    bot.run_until_disconnected()
+    await setup_dp_store()
+    await bot.run_until_disconnected()
 
 
 if __name__ == "__main__":
-    main()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
