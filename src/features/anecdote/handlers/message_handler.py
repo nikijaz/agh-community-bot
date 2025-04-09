@@ -13,4 +13,4 @@ class MessageHandler:
         self.bot.add_event_handler(self.__handle_message, NewMessage(incoming=True))
 
     async def __handle_message(self, event: NewMessage.Event):
-        self.activity_manager.bump_activity(event.chat_id)
+        await self.activity_manager.bump_activity(event.chat_id)

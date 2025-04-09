@@ -1,8 +1,7 @@
 import asyncio
 import time
-from typing import TypedDict, cast
+from typing import TypedDict
 
-from redis import Redis
 from telethon import TelegramClient
 
 from src.store.redis_store import REDIS_STORE
@@ -15,7 +14,7 @@ class CaptchaData(TypedDict):
 class CaptchaManager:
     def __init__(self, bot: TelegramClient):
         self.bot = bot
-        self.redis: Redis = REDIS_STORE
+        self.redis = REDIS_STORE
 
         self.loop = asyncio.get_event_loop()
         self.loop.create_task(self.__monitor_captcha_timeout())
@@ -23,21 +22,24 @@ class CaptchaManager:
     async def __monitor_captcha_timeout(self) -> None:
         while True:
             current_time = time.time()
-            expired_keys: list[str] = self.redis.zrangebyscore(
+            expired_keys: list[str] = await self.redis.zrangebyscore(
                 "captcha_timeouts", 0, current_time
             )
 
             for key in expired_keys:
                 chat_id, user_id = key.split(":")
                 captcha_key = f"captcha:{chat_id}:{user_id}"
-                data: CaptchaData = cast(CaptchaData, self.redis.hgetall(captcha_key))
+                data = await self.redis.hgetall(captcha_key)
+                captcha_data = CaptchaData(message_id=int(data["message_id"]))
 
                 self.loop.create_task(
-                    self.__handle_captcha_timeout(int(chat_id), int(user_id), data)
+                    self.__handle_captcha_timeout(
+                        int(chat_id), int(user_id), captcha_data
+                    )
                 )
-                self.redis.delete(captcha_key)
+                await self.redis.delete(captcha_key)
 
-                self.redis.zrem("captcha_timeouts", key)
+                await self.redis.zrem("captcha_timeouts", key)
 
             await asyncio.sleep(5)
 
@@ -49,30 +51,30 @@ class CaptchaManager:
         await self.bot.delete_messages(chat_id, message_id)
         await self.bot.kick_participant(chat_id, user_id)
 
-    def get_captcha_data(self, chat_id: int, user_id: int) -> CaptchaData | None:
+    async def get_captcha_data(self, chat_id: int, user_id: int) -> CaptchaData | None:
         captcha_key = f"captcha:{chat_id}:{user_id}"
-        data = self.redis.hgetall(captcha_key)
+        data = await self.redis.hgetall(captcha_key)
 
         if not data:
             return None
-        return cast(CaptchaData, data)
+        return CaptchaData(message_id=int(data["message_id"]))
 
-    def add_captcha_timeout(
+    async def add_captcha_timeout(
         self, chat_id: int, user_id: int, expires_at: float, captcha_data: CaptchaData
     ) -> None:
         captcha_key = f"captcha:{chat_id}:{user_id}"
 
-        self.redis.hset(
+        await self.redis.hset(
             captcha_key,
-            mapping=cast(dict, captcha_data),
+            mapping={k: str(v) for k, v in captcha_data.items()},
         )
 
-        self.redis.zadd(
+        await self.redis.zadd(
             "captcha_timeouts",
             {f"{chat_id}:{user_id}": expires_at},
         )
 
-    def remove_captcha_timeout(self, chat_id: int, user_id: int) -> None:
+    async def remove_captcha_timeout(self, chat_id: int, user_id: int) -> None:
         captcha_key = f"captcha:{chat_id}:{user_id}"
-        self.redis.delete(captcha_key)
-        self.redis.zrem("captcha_timeouts", f"{chat_id}:{user_id}")
+        await self.redis.delete(captcha_key)
+        await self.redis.zrem("captcha_timeouts", f"{chat_id}:{user_id}")

@@ -19,4 +19,6 @@ class ButtonPressHandler:
             event.chat_id, event.sender_id, send_messages=True
         )
         await event.delete()
-        self.captcha_manager.remove_captcha_timeout(event.chat_id, event.sender_id)
+        await self.captcha_manager.remove_captcha_timeout(
+            event.chat_id, event.sender_id
+        )

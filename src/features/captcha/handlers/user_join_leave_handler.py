@@ -29,7 +29,7 @@ class UserJoinLeaveHandler:
             f"Hey, @{event.user.username}! To start chatting in the group, click the button below.",
             buttons=[Button.inline("I'm not a robot", data="buttonCaptcha")],
         )
-        self.captcha_manager.add_captcha_timeout(
+        await self.captcha_manager.add_captcha_timeout(
             event.chat_id,
             event.user_id,
             (time.time() + 5),
@@ -37,9 +37,11 @@ class UserJoinLeaveHandler:
         )
 
     async def __handle_user_leave(self, event: ChatAction.Event):
-        captcha_data = self.captcha_manager.get_captcha_data(
+        captcha_data = await self.captcha_manager.get_captcha_data(
             event.chat_id, event.user_id
         )
         if captcha_data:
             await self.bot.delete_messages(event.chat_id, captcha_data["message_id"])
-            self.captcha_manager.remove_captcha_timeout(event.chat_id, event.user_id)
+            await self.captcha_manager.remove_captcha_timeout(
+                event.chat_id, event.user_id
+            )

@@ -1,6 +1,6 @@
 from typing import Final
 
-from redis import Redis
+from redis.asyncio import Redis
 
 from src.utils.config import CONFIG
 
