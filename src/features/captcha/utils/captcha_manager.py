@@ -9,6 +9,7 @@ from src.store.redis_store import REDIS_STORE
 
 class CaptchaData(TypedDict):
     message_id: Required[int]
+    button_id: Required[str]
 
 
 class CaptchaManager:
@@ -30,7 +31,9 @@ class CaptchaManager:
                 chat_id, user_id = key.split(":")
                 captcha_key = f"captcha:{chat_id}:{user_id}"
                 data = await self.redis.hgetall(captcha_key)
-                captcha_data = CaptchaData(message_id=int(data["message_id"]))
+                captcha_data = CaptchaData(
+                    message_id=int(data["message_id"]), button_id=data["button_id"]
+                )
 
                 self.loop.create_task(
                     self.__handle_captcha_timeout(
@@ -57,7 +60,9 @@ class CaptchaManager:
 
         if not data:
             return None
-        return CaptchaData(message_id=int(data["message_id"]))
+        return CaptchaData(
+            message_id=int(data["message_id"]), button_id=data["button_id"]
+        )
 
     async def add_captcha_timeout(
         self, chat_id: int, user_id: int, expires_at: float, captcha_data: CaptchaData
