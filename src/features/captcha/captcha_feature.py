@@ -9,13 +9,13 @@ class CaptchaFeature:
     def __init__(self, bot: TelegramClient):
         self.bot = bot
 
-    def setup(self):
+    def setup(self) -> None:
         self.setup_captcha_manager()
         self.setup_handlers()
 
-    def setup_captcha_manager(self):
+    def setup_captcha_manager(self) -> None:
         self.captcha_manager = CaptchaManager(self.bot)
 
-    def setup_handlers(self):
+    def setup_handlers(self) -> None:
         UserJoinLeaveHandler(self.bot, self.captcha_manager).setup()
         ButtonPressHandler(self.bot, self.captcha_manager).setup()

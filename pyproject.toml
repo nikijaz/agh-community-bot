@@ -24,6 +24,8 @@ dev = [
 
 [tool.mypy]
 follow_untyped_imports = true
+strict = true
+untyped_calls_exclude = ["telethon"]
 
 [tool.ruff.format]
 quote-style = "double"

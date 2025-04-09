@@ -1,7 +1,7 @@
 import time
 
 from telethon import Button, TelegramClient
-from telethon.events import ChatAction
+from telethon.events.chataction import ChatAction
 
 from src.features.captcha.utils.captcha_manager import CaptchaManager
 
@@ -11,7 +11,7 @@ class UserJoinLeaveHandler:
         self.bot = bot
         self.captcha_manager = captcha_manager
 
-    def setup(self):
+    def setup(self) -> None:
         self.bot.add_event_handler(
             self.__handle_user_join,
             ChatAction(func=lambda e: e.user_joined),
@@ -21,7 +21,7 @@ class UserJoinLeaveHandler:
             ChatAction(func=lambda e: e.user_left),
         )
 
-    async def __handle_user_join(self, event: ChatAction.Event):
+    async def __handle_user_join(self, event: ChatAction.Event) -> None:
         await self.bot.edit_permissions(
             event.chat_id, event.user_id, send_messages=False
         )
@@ -36,7 +36,7 @@ class UserJoinLeaveHandler:
             {"message_id": message.id},
         )
 
-    async def __handle_user_leave(self, event: ChatAction.Event):
+    async def __handle_user_leave(self, event: ChatAction.Event) -> None:
         captcha_data = await self.captcha_manager.get_captcha_data(
             event.chat_id, event.user_id
         )

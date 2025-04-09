@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import TypedDict
+from typing import Required, TypedDict
 
 from telethon import TelegramClient
 
@@ -8,7 +8,7 @@ from src.store.redis_store import REDIS_STORE
 
 
 class CaptchaData(TypedDict):
-    message_id: int
+    message_id: Required[int]
 
 
 class CaptchaManager:

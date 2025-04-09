@@ -1,9 +1,9 @@
-from typing import Final, TypedDict
+from typing import Final, Required, TypedDict
 
 
 class Anecdote(TypedDict):
-    text: str
-    hash: int  # This will be used to check if the anecdote was already sent
+    text: Required[str]
+    hash: Required[int]  # This will be used to check if the anecdote was already sent
 
 
 def get_anecdote_list() -> list[Anecdote]:

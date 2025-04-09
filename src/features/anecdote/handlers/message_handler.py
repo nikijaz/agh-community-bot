@@ -1,5 +1,5 @@
 from telethon import TelegramClient
-from telethon.events import NewMessage
+from telethon.events.newmessage import NewMessage
 
 from src.features.anecdote.utils.activity_manager import ActivityManager
 
@@ -9,8 +9,8 @@ class MessageHandler:
         self.bot = bot
         self.activity_manager = activity_manager
 
-    def setup(self):
+    def setup(self) -> None:
         self.bot.add_event_handler(self.__handle_message, NewMessage(incoming=True))
 
-    async def __handle_message(self, event: NewMessage.Event):
+    async def __handle_message(self, event: NewMessage.Event) -> None:
         await self.activity_manager.bump_activity(event.chat_id)
