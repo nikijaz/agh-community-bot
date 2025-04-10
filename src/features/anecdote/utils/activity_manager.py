@@ -21,21 +21,26 @@ class ActivityManager:
         while True:
             current_time = time.time()
             inactive_chat_id_list: list[str] = await self.redis.zrangebyscore(
-                "last_message_times",
+                "last_message_time_list",
                 0,
                 current_time - CONFIG.INACTIVITY_TIMEOUT,
             )
 
             for chat_id in inactive_chat_id_list:
                 self.loop.create_task(self.__handle_inactivity(int(chat_id)))
-                await self.redis.zrem("last_message_times", chat_id)
+                await self.redis.zrem("last_message_time_list", chat_id)
 
             await asyncio.sleep(5)
 
     async def __handle_inactivity(self, chat_id: int) -> None:
-        await self.bot.send_message(
-            chat_id, self.anecdote_manager.get_random_anecdote()
-        )
+        anecdote = await self.anecdote_manager.get_anecdote(chat_id)
+        if not anecdote:
+            await self.bot.send_message(
+                chat_id,
+                "I was gonna tell a joke, but then I remembered I'm a bot with limitations.",
+            )
+            return
+        await self.bot.send_message(chat_id, anecdote["text"])
 
     async def bump_activity(self, chat_id: int) -> None:
-        await self.redis.zadd("last_message_times", {f"{chat_id}": time.time()})
+        await self.redis.zadd("last_message_time_list", {f"{chat_id}": time.time()})
