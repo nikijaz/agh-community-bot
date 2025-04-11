@@ -1,0 +1,26 @@
+services:
+  agh-community-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agh-community-bot
+    volumes:
+      - ${ENV_FILE_PATH:-./.env}:/app/.env:ro
+      - ${ANECDOTES_FILE_PATH:-./anecdotes.txt}:/app/anecdotes.txt:ro
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    command: redis-server --save 60 1
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:
