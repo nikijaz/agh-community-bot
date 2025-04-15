@@ -19,7 +19,7 @@ class CaptchaTimeoutMonitor:
         while True:
             current_time = time.time()
             expired_keys: list[str] = await REDIS_STORE.zrangebyscore(
-                "captcha_timeouts", 0, current_time - CONFIG.CAPTCHA_TIMEOUT
+                "captcha_time", 0, current_time - CONFIG.CAPTCHA_TIMEOUT
             )
 
             for key in expired_keys:
@@ -37,7 +37,7 @@ class CaptchaTimeoutMonitor:
                 )
 
                 await REDIS_STORE.delete(captcha_key)
-                await REDIS_STORE.zrem("captcha_timeouts", key)
+                await REDIS_STORE.zrem("captcha_time", key)
 
             await asyncio.sleep(5)
 
