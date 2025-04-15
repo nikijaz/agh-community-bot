@@ -2,7 +2,6 @@ from typing import Final
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
@@ -23,8 +22,4 @@ async def setup_dp_store() -> None:
         await connection.run_sync(Base.metadata.create_all)
 
 
-__async_sessionmaker: Final = async_sessionmaker(DB_STORE, expire_on_commit=False)
-
-
-def async_session() -> AsyncSession:
-    return __async_sessionmaker()
+async_session: Final = async_sessionmaker(DB_STORE, expire_on_commit=False)

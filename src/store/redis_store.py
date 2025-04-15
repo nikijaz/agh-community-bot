@@ -4,8 +4,7 @@ from redis.asyncio import Redis
 
 from src.utils.config import CONFIG
 
-REDIS_STORE: Final = Redis(
-    host=CONFIG.REDIS_HOST,
-    port=CONFIG.REDIS_PORT,
+REDIS_STORE: Final = Redis.from_url(
+    CONFIG.REDIS_URL,
     decode_responses=True,
 )
