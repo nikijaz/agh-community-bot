@@ -1,13 +1,14 @@
 import random
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from telethon import TelegramClient
 
-from datetime import datetime, timezone
+from src.features.anecdote.anecdote_config import ANECDOTE_CONFIG
 from src.features.anecdote.models.anecdote_model import AnecdoteModel
 from src.features.anecdote.store.anecdote_store import ANECDOTE_STORE, Anecdote
-from src.store.redis_store import REDIS_STORE
 from src.store.db_store import async_session
+from src.store.redis_store import REDIS_STORE
 
 
 class AnecdoteManager:
@@ -17,7 +18,8 @@ class AnecdoteManager:
     async def __mark_anecdote_used(self, chat_id: int, anecdote: Anecdote) -> None:
         current_time = datetime.now(timezone.utc)
         await REDIS_STORE.set(
-            f"anecdote:{chat_id}:{anecdote['hash']}", current_time.timestamp()
+            f"{ANECDOTE_CONFIG.REDIS_ANECDOTE_TIME_KEY}:{chat_id}:{anecdote['hash']}",
+            current_time.timestamp(),
         )
         async with async_session() as session:
             session.add(
@@ -40,7 +42,9 @@ class AnecdoteManager:
 
         anecdote: Anecdote = random.choice(anecdote_list)
 
-        if await REDIS_STORE.exists(f"anecdote:{chat_id}:{anecdote['hash']}"):
+        if await REDIS_STORE.exists(
+            f"{ANECDOTE_CONFIG.REDIS_ANECDOTE_TIME_KEY}:{chat_id}:{anecdote['hash']}"
+        ):
             anecdote_list.pop(anecdote_list.index(anecdote))
             return await self.get_unique_anecdote(chat_id, anecdote_list)
         async with async_session() as session:

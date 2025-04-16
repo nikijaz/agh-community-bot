@@ -20,8 +20,5 @@ class Config:
     )
     REDIS_URL: str = os.environ["REDIS_URL"]
 
-    CAPTCHA_TIMEOUT: int = int(os.environ["CAPTCHA_TIMEOUT"])
-    INACTIVITY_TIMEOUT: int = int(os.environ["INACTIVITY_TIMEOUT"])
-
 
 CONFIG: Final = Config()

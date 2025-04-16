@@ -3,9 +3,9 @@ import time
 
 from telethon import TelegramClient
 
+from src.features.anecdote.anecdote_config import ANECDOTE_CONFIG
 from src.features.anecdote.utils.anecdote_manager import AnecdoteManager
 from src.store.redis_store import REDIS_STORE
-from src.utils.config import CONFIG
 
 
 class ActivityManager:
@@ -20,15 +20,24 @@ class ActivityManager:
     async def __monitor_last_message(self) -> None:
         while True:
             current_time = time.time()
-            inactive_chat_id_list: list[str] = await self.redis.zrangebyscore(
-                "last_message_time_list",
-                0,
-                current_time - CONFIG.INACTIVITY_TIMEOUT,
-            )
+            async for key in self.redis.scan_iter(
+                f"{ANECDOTE_CONFIG.REDIS_ACTIVE_TIME_KEY}:*"
+            ):
+                value = await self.redis.get(key)
+                chat_id = int(key.split(":")[1])
+                if not value:
+                    continue
 
-            for chat_id in inactive_chat_id_list:
-                self.loop.create_task(self.__handle_inactivity(int(chat_id)))
-                await self.redis.zrem("last_message_time_list", chat_id)
+                last_activity_time = float(value)
+                if (
+                    last_activity_time
+                    > current_time
+                    - await ANECDOTE_CONFIG.INACTIVITY_TIMEOUT.get(chat_id)
+                ):
+                    continue
+
+                self.loop.create_task(self.__handle_inactivity(chat_id))
+                await self.redis.delete(key)
 
             await asyncio.sleep(5)
 
@@ -43,4 +52,6 @@ class ActivityManager:
         await self.bot.send_message(chat_id, anecdote["text"])
 
     async def bump_activity(self, chat_id: int) -> None:
-        await self.redis.zadd("last_message_time_list", {f"{chat_id}": time.time()})
+        await self.redis.set(
+            f"{ANECDOTE_CONFIG.REDIS_ACTIVE_TIME_KEY}:{chat_id}", str(time.time())
+        )

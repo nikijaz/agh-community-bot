@@ -3,9 +3,9 @@ import time
 
 from telethon import TelegramClient
 
+from src.features.captcha.captcha_config import CAPTCHA_CONFIG
 from src.features.captcha.store.captcha_store import CaptchaData
 from src.store.redis_store import REDIS_STORE
-from src.utils.config import CONFIG
 
 
 class CaptchaTimeoutMonitor:
@@ -18,26 +18,37 @@ class CaptchaTimeoutMonitor:
     async def __monitor_captcha_timeout(self) -> None:
         while True:
             current_time = time.time()
-            expired_keys: list[str] = await REDIS_STORE.zrangebyscore(
-                "captcha_time", 0, current_time - CONFIG.CAPTCHA_TIMEOUT
-            )
+            async for key in REDIS_STORE.scan_iter(
+                f"{CAPTCHA_CONFIG.REDIS_CAPTCHA_TIME_KEY}:*"
+            ):
+                value = await REDIS_STORE.get(key)
+                chat_id = int(key.split(":")[1])
+                user_id = int(key.split(":")[2])
+                if not value:
+                    continue
 
-            for key in expired_keys:
-                chat_id, user_id = key.split(":")
-                captcha_key = f"captcha:{chat_id}:{user_id}"
-
-                data = await REDIS_STORE.hgetall(captcha_key)
+                data = await REDIS_STORE.hgetall(
+                    f"{CAPTCHA_CONFIG.REDIS_CAPTCHA_DATA_KEY}:{chat_id}:{user_id}"
+                )
                 captcha_data = CaptchaData(
                     message_id=int(data["message_id"]), button_id=data["button_id"]
                 )
+
+                captcha_time = float(value)
+                if (
+                    captcha_time
+                    > current_time - await CAPTCHA_CONFIG.CAPTCHA_TIMEOUT.get(chat_id)
+                ):
+                    continue
+
                 self.loop.create_task(
-                    self.__handle_captcha_timeout(
-                        int(chat_id), int(user_id), captcha_data
-                    )
+                    self.__handle_captcha_timeout(chat_id, user_id, captcha_data)
                 )
 
-                await REDIS_STORE.delete(captcha_key)
-                await REDIS_STORE.zrem("captcha_time", key)
+                await REDIS_STORE.delete(key)
+                await REDIS_STORE.delete(
+                    f"{CAPTCHA_CONFIG.REDIS_CAPTCHA_DATA_KEY}:{chat_id}:{user_id}"
+                )
 
             await asyncio.sleep(5)
 
