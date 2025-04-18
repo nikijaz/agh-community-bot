@@ -4,8 +4,8 @@ version = "0.1.0"
 license = { file = "LICENSE" }
 requires-python = ">=3.5"
 dependencies = [
+    "asyncpg>=0.23.0",
     "python-dotenv>=0.20.0",
-    "redis>=3.5.3",
     "sqlalchemy>=1.4.54",
     "telethon>=1.39.0",
 ]
@@ -13,13 +13,6 @@ dependencies = [
 [project.optional-dependencies]
 speed = [
     "cryptg>=0.3.1",
-    "hiredis>=1.1.0",
-]
-sqlite = [
-    "aiosqlite>=0.12.0",
-]
-postgres = [
-    "asyncpg>=0.23.0",
 ]
 
 [dependency-groups]
@@ -33,6 +26,9 @@ dev = [
 follow_untyped_imports = true
 strict = true
 untyped_calls_exclude = ["telethon"]
+
+[tool.ruff]
+line-length = 120
 
 [tool.ruff.format]
 quote-style = "double"

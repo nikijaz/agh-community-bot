@@ -6,28 +6,16 @@ services:
     image: agh-community-bot
     restart: unless-stopped
     environment:
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}}
     volumes:
       - ${ENV_FILE_PATH:-./.env}:/app/.env:ro
       - ${ANECDOTES_FILE_PATH:-./anecdotes.txt}:/app/anecdotes.txt:ro
-
-  redis:
-    image: redis:alpine
-    profiles: [ "redis" ]
-    command: redis-server --save 60 1 --loglevel warning
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:alpine
-    profiles: [ "postgres" ]
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -40,7 +28,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "6543:5432"
 
 volumes:
-  redis-data:
   postgres-data:

@@ -1,16 +1,19 @@
+from dataclasses import dataclass
 from typing import Final
 
-from src.config.config_entry import ConfigEntry
+from src.per_chat_config.config_field import ConfigField
 
 
+@dataclass(frozen=True)
 class AnecdoteConfig:
-    REDIS_ACTIVE_TIME_KEY = "active_time"
-    REDIS_ANECDOTE_TIME_KEY = "anecdote_time"
+    """Configuration for the Anecdote feature."""
 
-    INACTIVITY_TIMEOUT = ConfigEntry(
+    ACTIVITY_TIMEOUT_INTERVAL = 5
+
+    INACTIVITY_TIMEOUT = ConfigField(
         key="inactivity_timeout",
         description="Time in seconds before sending an anecdote",
-        default=60,
+        default=5,
     )
 
 
