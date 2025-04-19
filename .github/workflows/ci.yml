@@ -3,14 +3,21 @@ name: "Python CI"
 on:
   push:
     branches: [main]
+    paths:
+      - ".github/workflows/ci.yml"
+      - "pyproject.toml"
+      - "**/*.py"
   pull_request:
     branches: [main]
+    paths:
+      - ".github/workflows/ci.yml"
+      - "pyproject.toml"
+      - "**/*.py"
 
 jobs:
   lint:
     name: "Lint & Typecheck"
     runs-on: ubuntu-latest
-
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
@@ -22,12 +29,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version-file: "pyproject.toml"
+
+      - name: "Install dependencies"
+        run: uv sync
+
+      - name: "MyPy: Typecheck"
+        run: uv run mypy .
     
       - name: "Ruff: Static Analysis"
         run: uv run ruff check .
 
       - name: "Ruff: Format Check"
         run: uv run ruff format --check .
-    
-      - name: "MyPy: Typecheck"
-        run: uv run mypy .
