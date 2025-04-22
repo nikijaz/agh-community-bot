@@ -6,7 +6,6 @@ x-bot: &bot
     PYTHONUNBUFFERED: 1
   volumes:
     - ${ENV_FILE_PATH:-./.env}:/app/.env:ro
-    - ${ANECDOTES_FILE_PATH:-./anecdotes.txt}:/app/anecdotes.txt:ro
 
 x-postgres: &postgres
   image: postgres:alpine

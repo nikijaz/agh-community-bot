@@ -179,6 +179,3 @@ cython_debug/
 # User session and configuration
 *.session
 *.conf
-
-# File with anecdotes
-anecdotes.txt

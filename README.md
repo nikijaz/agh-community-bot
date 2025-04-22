@@ -15,8 +15,7 @@ prevent spam and anecdote sending to keep the community engaged.
     ```
 
 2. Create `.env` file with your configuration. You can use `.env.template` as a template.
-3. Create `anecdotes.txt` file with anecdotes, each on a new line.
-4. Run detached Docker container in production mode:
+3. Run detached Docker container in production mode:
 
     ```shell
     docker compose --profile prod up -d
@@ -34,28 +33,27 @@ prevent spam and anecdote sending to keep the community engaged.
     ```
 
 2. Create `.env` file with your configuration. You can use `.env.template` as a template.
-3. Create `anecdotes.txt` file with anecdotes, each on a new line.
 
-4. Install dependencies:
+3. Install dependencies:
 
     ```shell
     uv sync
     ```
 
-5. Make changes to the code.
-6. Run detached Docker container in development mode (this will start only the PostgreSQL service):
+4. Make changes to the code.
+5. Run detached Docker container in development mode (this will start only the PostgreSQL service):
 
     ```shell
     docker compose --profile dev up -d
     ```
 
-7. Verify your changes by running the bot:
+6. Verify your changes by running the bot:
 
     ```shell
     uv run main.py
     ```
 
-8. Check for any typing, linting or formatting issues:
+7. Check for any typing, linting or formatting issues:
 
     ```shell
     mypy .
